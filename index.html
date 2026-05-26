@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LockIN Team Assistant</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #D4FF2B;
+      --accent-dim: rgba(212, 255, 43, 0.12);
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --border: rgba(255,255,255,0.08);
+      --text: rgba(255,255,255,0.9);
+      --text-dim: rgba(255,255,255,0.45);
+      --red: #ef4444;
+      --radius: 14px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ── Login screen ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: radial-gradient(ellipse at 50% 0%, rgba(212,255,43,0.05) 0%, transparent 60%);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 380px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .login-subtitle {
+      color: var(--text-dim);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.875rem 1rem;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--accent);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.875rem;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .login-error {
+      color: var(--red);
+      font-size: 0.85rem;
+      margin-top: 0.75rem;
+      min-height: 1.2em;
+    }
+
+    /* ── App shell ── */
+    #app {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 900;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .header-badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(212,255,43,0.2);
+      border-radius: 20px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-logout:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+    /* ── Messages ── */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scroll-behavior: smooth;
+    }
+
+    #messages::-webkit-scrollbar { width: 4px; }
+    #messages::-webkit-scrollbar-track { background: transparent; }
+    #messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    .msg {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 100%;
+      animation: fadeUp 0.2s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .avatar.bot {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(212,255,43,0.25);
+    }
+
+    .avatar.user-av {
+      background: rgba(255,255,255,0.08);
+      color: var(--text-dim);
+    }
+
+    .bubble {
+      max-width: calc(100% - 48px);
+      padding: 0.75rem 1rem;
+      border-radius: 18px;
+      font-size: 0.925rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg.bot .bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px 18px 18px 18px;
+    }
+
+    .msg.user .bubble {
+      background: var(--accent);
+      color: #000;
+      font-weight: 500;
+      border-radius: 18px 4px 18px 18px;
+    }
+
+    .bubble code {
+      background: rgba(255,255,255,0.08);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-family: "SF Mono", "Fira Code", monospace;
+    }
+
+    .bubble strong { font-weight: 700; }
+
+    /* typing indicator */
+    .typing-bubble {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px 18px 18px 18px;
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      animation: bounce 1.2s infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30%           { transform: translateY(-5px); }
+    }
+
+    /* ── Input bar ── */
+    .input-bar {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    #user-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      resize: none;
+      min-height: 48px;
+      max-height: 140px;
+      outline: none;
+      font-family: inherit;
+      line-height: 1.5;
+      transition: border-color 0.2s;
+    }
+
+    #user-input:focus { border-color: rgba(212,255,43,0.4); }
+    #user-input::placeholder { color: var(--text-dim); }
+
+    .send-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .send-btn:hover { opacity: 0.85; }
+    .send-btn:active { transform: scale(0.93); }
+    .send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    .input-hint {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    /* Welcome message suggestions */
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .suggestion-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .suggestion-chip:hover {
+      border-color: rgba(212,255,43,0.3);
+      color: var(--accent);
+    }
+
+    /* ── Mobile tweaks ── */
+    @media (max-width: 600px) {
+      .login-card { padding: 2rem 1.5rem; }
+      #messages { padding: 1rem; }
+      .input-bar { padding: 0.875rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      LockIN
+    </div>
+    <p class="login-subtitle">Team Assistant · Internal use only</p>
+
+    <div class="input-wrap">
+      <input
+        id="password-input"
+        type="password"
+        placeholder="Team password"
+        autocomplete="current-password"
+      />
+    </div>
+
+    <button class="btn-primary" id="login-btn" onclick="handleLogin()">
+      Enter
+    </button>
+
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="app-header">
+    <div class="header-logo">
+      <div class="logo-dot" style="width:8px;height:8px;background:var(--accent);border-radius:50%"></div>
+      LockIN Assistant
+      <span class="header-badge">Internal</span>
+    </div>
+    <button class="btn-logout" onclick="handleLogout()">Sign out</button>
+  </div>
+
+  <div id="messages"></div>
+
+  <div class="input-bar">
+    <div class="input-row">
+      <textarea
+        id="user-input"
+        placeholder="Ask anything about the LockIN project..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+    <div class="input-hint">Enter to send · Shift+Enter for new line</div>
+  </div>
+</div>
+
+<script>
+  // ── State ──
+  let history = [];
+  let isLoading = false;
+  let teamPassword = "";
+
+  const SUGGESTIONS = [
+    "What is LockIN?",
+    "How does the FAST checker work?",
+    "What's the DiGA strategy?",
+    "What clinical AI engines exist?",
+    "Who built this app?",
+    "What's the tech stack?",
+    "How does emergency escalation work?",
+    "What's the Huawei Watch D2 used for?",
+  ];
+
+  // ── Login ──
+  document.getElementById("password-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleLogin();
+  });
+
+  function handleLogin() {
+    const pw = document.getElementById("password-input").value.trim();
+    const errEl = document.getElementById("login-error");
+
+    if (!pw) {
+      errEl.textContent = "Enter the team password";
+      return;
+    }
+
+    teamPassword = pw;
+    errEl.textContent = "";
+
+    // Verify password by sending a test request
+    const btn = document.getElementById("login-btn");
+    btn.disabled = true;
+    btn.textContent = "Checking...";
+
+    callAPI("Hello", [])
+      .then(() => {
+        document.getElementById("login-screen").style.display = "none";
+        const appEl = document.getElementById("app");
+        appEl.style.display = "flex";
+        showWelcome();
+        document.getElementById("user-input").focus();
+      })
+      .catch((err) => {
+        if (err.message === "401") {
+          errEl.textContent = "Wrong password — try again";
+          teamPassword = "";
+        } else {
+          errEl.textContent = "Connection error — check internet";
+        }
+        btn.disabled = false;
+        btn.textContent = "Enter";
+      });
+  }
+
+  function handleLogout() {
+    teamPassword = "";
+    history = [];
+    document.getElementById("messages").innerHTML = "";
+    document.getElementById("app").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("password-input").value = "";
+    document.getElementById("login-error").textContent = "";
+  }
+
+  // ── Welcome ──
+  function showWelcome() {
+    const container = document.getElementById("messages");
+    const welcomeEl = document.createElement("div");
+    welcomeEl.innerHTML = `
+      <div class="msg bot" style="animation:fadeUp 0.3s ease">
+        <div class="avatar bot">LK</div>
+        <div>
+          <div class="bubble">
+            👋 Hi! I'm the LockIN project assistant.
+
+Ask me anything about the app — architecture, clinical features, DiGA strategy, the team, or technical decisions.
+
+I only answer questions about LockIN.
+          </div>
+          <div class="suggestions" id="suggestions">
+            ${SUGGESTIONS.map(s =>
+              `<button class="suggestion-chip" onclick="useSuggestion('${s}')">${s}</button>`
+            ).join("")}
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(welcomeEl);
+    scrollToBottom();
+  }
+
+  function useSuggestion(text) {
+    document.getElementById("suggestions")?.remove();
+    document.getElementById("user-input").value = text;
+    sendMessage();
+  }
+
+  // ── Messaging ──
+  async function sendMessage() {
+    const input = document.getElementById("user-input");
+    const text = input.value.trim();
+    if (!text || isLoading) return;
+
+    // Remove suggestions if still there
+    document.getElementById("suggestions")?.remove();
+
+    input.value = "";
+    autoResize(input);
+    addMessage("user", text);
+
+    isLoading = true;
+    document.getElementById("send-btn").disabled = true;
+
+    const typingId = addTyping();
+
+    try {
+      const reply = await callAPI(text, history);
+      removeTyping(typingId);
+      addMessage("bot", reply);
+      history.push({ role: "user", content: text });
+      history.push({ role: "assistant", content: reply });
+      // Keep last 20 messages (10 turns)
+      if (history.length > 20) history = history.slice(-20);
+    } catch (err) {
+      removeTyping(typingId);
+      addMessage("bot", "⚠️ Error: " + (err.message === "401" ? "Session expired — please reload." : "Could not reach the server. Try again."));
+    } finally {
+      isLoading = false;
+      document.getElementById("send-btn").disabled = false;
+      input.focus();
+    }
+  }
+
+  async function callAPI(message, hist) {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, password: teamPassword, history: hist }),
+    });
+
+    if (res.status === 401) throw new Error("401");
+    if (!res.ok) throw new Error(String(res.status));
+
+    const data = await res.json();
+    return data.reply;
+  }
+
+  function addMessage(role, text) {
+    const container = document.getElementById("messages");
+    const el = document.createElement("div");
+    el.className = `msg ${role}`;
+
+    const avatar = role === "bot"
+      ? `<div class="avatar bot">LK</div>`
+      : `<div class="avatar user-av">You</div>`;
+
+    el.innerHTML = `
+      ${avatar}
+      <div class="bubble">${formatText(text)}</div>
+    `;
+
+    container.appendChild(el);
+    scrollToBottom();
+  }
+
+  function addTyping() {
+    const container = document.getElementById("messages");
+    const id = "typing-" + Date.now();
+    const el = document.createElement("div");
+    el.className = "msg bot";
+    el.id = id;
+    el.innerHTML = `
+      <div class="avatar bot">LK</div>
+      <div class="typing-bubble">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    `;
+    container.appendChild(el);
+    scrollToBottom();
+    return id;
+  }
+
+  function removeTyping(id) {
+    document.getElementById(id)?.remove();
+  }
+
+  function formatText(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\n/g, "<br>");
+  }
+
+  function scrollToBottom() {
+    const container = document.getElementById("messages");
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // ── Input helpers ──
+  function handleKey(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function autoResize(el) {
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 140) + "px";
+  }
+</script>
+</body>
+</html>
