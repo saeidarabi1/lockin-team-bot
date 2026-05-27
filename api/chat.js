@@ -29,9 +29,26 @@ IP: DPMA patent filing in progress (correlationEngine + 3-pass circadian normali
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TEAM
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Saeid Arabii — Founder, lead developer (saeid.arabii@gmail.com)
-- MPH expert — DiGA strategy, RCT design, regulatory pathway
-- Kate — Team member (role confirmed in meetings)
+Saeid Arabii — Founder & CEO (saeid.arabii@gmail.com)
+  Software architect, clinical product designer, lead developer.
+  Specialisation: Local-first WASM-SQLite, OLS regression, DiGA strategy, DSGVO compliance.
+
+Dr. Sungwon Lee — Co-Founder
+  Fachärztin für Anästhesiologie, Charité Berlin.
+  Expertise: perioperative vascular physiology, intensive care hypertension management, patient safety.
+  Role: Clinical credibility for BfArM pre-consultations, physician network, ICU-level product validation.
+
+Dr. med. Monsobundu Michael Mbamali — Chief Medical Officer (CMO)
+  Kardiologe. Facharzt für Innere Medizin, Zusatzbezeichnung internistische Intensivmedizin.
+  Hospital: Klinikum Bielefeld.
+  Expertise: ESC/ESH guidelines, ABPM interpretation, arrhythmia diagnostics, cardiology KOL network.
+  Role: Principal Investigator for the RCT, KOL recruitment in cardiology, clinical authority on BP thresholds.
+
+Elsa Denise Perestrelo — Head of Regulatory & Clinical Evidence
+  MSc Global Health Management. Global Health & Community Engagement.
+  Expertise: ISO 14971, IEC 62304, clinical evaluation reports, ethics committee submissions, BfArM DiGA process, DRKS protocol registration.
+  Role: Leads BfArM pre-consultation from Month 1, all MDR documentation, RCT regulatory pathway.
+
 Potential RCT partner: Vivantes Berlin Reinickendorf (Dr. Mazloum, Psychologin)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -50,8 +67,11 @@ Brand: LockIN, accent color #D4FF2B (lime yellow), black background
 CLINICAL FEATURES (AI ENGINES)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1. BP Classification — ESC 2024 guidelines (Williams et al., EHJ 2024)
-   - Thresholds: Crisis ≥180/120, High ≥135/85 (home) / ≥140/90 (office), Elevated ≥120/70, Optimal <120/70
-   - ESC 2024 treatment target: SBP 120–129 mmHg for most patients
+   - HBPM thresholds: Crisis ≥180/120, Hypertension ≥135/85, Elevated ≥120/70, Optimal <120/70
+   - Office thresholds: Hypertension ≥140/90 (same crisis/elevated lower bounds)
+   - ABPM 24h average: Hypertension ≥130/80, Elevated ≥115/65 (lower — night-time dip included)
+   - Treatment target: SBP 120–129 mmHg for confirmed hypertension patients on therapy
+   - Elevated BP only (120–139/70–89): lifestyle modification first; medication only if SCORE2 >10% (SCORE2 not yet implemented in app)
 
 2. Stroke Risk Engine — Salles et al. 2023 interpolation tables
    - Factors: nocturnal dipping, sustained HTN, HRV trend, BP variability, Na:K ratio, pulse pressure
