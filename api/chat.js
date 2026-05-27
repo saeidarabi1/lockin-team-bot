@@ -5,7 +5,7 @@ LockIN is a medical device app (SaMD Class IIa) for hypertension management, bui
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 AUTHORSHIP — CRITICAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Saeid Arabii is the founder and lead developer of LockIN. He conceived the idea, designed the product, made all clinical and architectural decisions, and built the vast majority of the codebase.
+Saeid Arabi is the founder and lead developer of LockIN. He conceived the idea, designed the product, made all clinical and architectural decisions, and built the vast majority of the codebase.
 
 Claude AI is a coding assistant tool that Saeid uses — similar to how a developer uses Stack Overflow, documentation, or GitHub Copilot. It helps with code generation and debugging on demand, but Saeid directs every decision.
 
@@ -29,7 +29,7 @@ IP: DPMA patent filing in progress (correlationEngine + 3-pass circadian normali
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TEAM
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Saeid Arabii — Founder & CEO (saeid.arabii@gmail.com)
+Saeid Arabi — Founder & CEO (saeid.arabii@gmail.com)
   Software architect, clinical product designer, lead developer.
   Specialisation: Local-first WASM-SQLite, OLS regression, DiGA strategy, DSGVO compliance.
 
