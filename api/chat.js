@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+
 const SYSTEM_PROMPT = `You are the LockIN Project Assistant — a knowledgeable guide for the LockIN team.
 
 LockIN is a medical device app (SaMD Class IIa) for hypertension management, built for DiGA certification (§139e SGB V — German statutory health insurance reimbursement).
@@ -29,14 +32,14 @@ IP: DPMA patent filing in progress (correlationEngine + 3-pass circadian normali
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TEAM
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Saeid Arabi — Founder & CEO (saeid.arabii@gmail.com)
+Saeid Arabi — Founder & CEO (saeid.arabi@ymail.com)
   Software architect, clinical product designer, lead developer.
   Specialisation: Local-first WASM-SQLite, OLS regression, DiGA strategy, DSGVO compliance.
 
-Dr. Sungwon Lee — Co-Founder
-  Fachärztin für Anästhesiologie, Charité Berlin.
+Dr. Sungwon Lee — Co-Founder & COO (Katesungwon@gmail.com)
+  Fachärztin für Anästhesiologie.
   Expertise: perioperative vascular physiology, intensive care hypertension management, patient safety.
-  Role: Clinical credibility for BfArM pre-consultations, physician network, ICU-level product validation.
+  Role: Clinical credibility for BfArM pre-consultations, physician network, ICU-level product validation, Korean medical network for Sky Labs engagement.
 
 Dr. med. Monsobundu Michael Mbamali — Chief Medical Officer (CMO)
   Kardiologe. Facharzt für Innere Medizin, Zusatzbezeichnung internistische Intensivmedizin.
@@ -44,7 +47,7 @@ Dr. med. Monsobundu Michael Mbamali — Chief Medical Officer (CMO)
   Expertise: ESC/ESH guidelines, ABPM interpretation, arrhythmia diagnostics, cardiology KOL network.
   Role: Principal Investigator for the RCT, KOL recruitment in cardiology, clinical authority on BP thresholds.
 
-Elsa Denise Perestrelo — Head of Regulatory & Clinical Evidence
+Elsa Denise Perestrelo — Head of Regulatory & Clinical Evidence (MPH)
   MSc Global Health Management. Global Health & Community Engagement.
   Expertise: ISO 14971, IEC 62304, clinical evaluation reports, ethics committee submissions, BfArM DiGA process, DRKS protocol registration.
   Role: Leads BfArM pre-consultation from Month 1, all MDR documentation, RCT regulatory pathway.
@@ -118,6 +121,13 @@ Primary device: Huawei Watch D2 (only consumer watch with validated wrist BP mea
 - ESH/ISO 81060-2 validated BP
 Integration: via Health Connect (Android) or direct BLE
 
+Candidate device: Sky Labs CART B.P.Pro (ring-form, cuffless, continuous 24h BP)
+- CE IIb, MHRA certified, ISO 81060-2:2018 validated (≤5 mmHg avg error)
+- Official 2026 Korean hypertension guidelines
+- 250,000+ prescriptions in Korea
+- Charité Berlin research relationship (2018)
+- Integration target: Android Health Connect or direct BLE
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 IP PROTECTION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -129,11 +139,38 @@ IP PROTECTION
 YOUR ROLE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - Answer questions about LockIN: architecture, clinical features, strategy, team, decisions
+- For clinical evidence, research papers, regulatory documents, and external references: answer from the KNOWLEDGE BASE section below (if loaded). Cite the document name when you do.
+- For LockIN project questions: use your built-in knowledge above.
+- If a clinical/regulatory fact is not found in the knowledge base AND not in your built-in knowledge, say: "I don't have a source for that — please add the relevant document to the knowledge base."
 - Be concise and accurate
 - Refuse questions unrelated to LockIN (e.g., general coding help, other projects)
 - Never share API keys, passwords, or sensitive credentials
 - If unsure about a specific detail, say so — don't fabricate clinical numbers or regulatory facts
 `;
+
+function loadKnowledgeBase() {
+  try {
+    const knowledgeDir = path.join(process.cwd(), "knowledge");
+    if (!fs.existsSync(knowledgeDir)) return "";
+
+    const files = fs
+      .readdirSync(knowledgeDir)
+      .filter((f) => (f.endsWith(".md") || f.endsWith(".txt")) && f !== "README.md")
+      .sort();
+
+    if (files.length === 0) return "";
+
+    const sections = files.map((file) => {
+      const content = fs.readFileSync(path.join(knowledgeDir, file), "utf-8");
+      const name = file.replace(/\.(md|txt)$/, "").replace(/-/g, " ").toUpperCase();
+      return `### ${name}\n\n${content}`;
+    });
+
+    return sections.join("\n\n---\n\n");
+  } catch {
+    return "";
+  }
+}
 
 export default async function handler(req, res) {
   // CORS
@@ -158,8 +195,21 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Message too long (max 2000 chars)" });
   }
 
+  // Load knowledge base documents
+  const knowledgeBase = loadKnowledgeBase();
+  const fullSystemPrompt = knowledgeBase
+    ? `${SYSTEM_PROMPT}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KNOWLEDGE BASE — UPLOADED DOCUMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The following documents have been uploaded by the team. For clinical evidence, regulatory content, research papers, and external references, answer ONLY from these documents. Always cite the document name when referencing them.
+
+${knowledgeBase}
+`
+    : SYSTEM_PROMPT;
+
   // Build messages array with history (last 10 exchanges max)
-  const recentHistory = history.slice(-20); // max 10 turns = 20 messages
+  const recentHistory = history.slice(-20);
   const messages = [
     ...recentHistory,
     { role: "user", content: message.trim() },
@@ -176,7 +226,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "claude-haiku-4-5",
         max_tokens: 1024,
-        system: SYSTEM_PROMPT,
+        system: fullSystemPrompt,
         messages,
       }),
     });
