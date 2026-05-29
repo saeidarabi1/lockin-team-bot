@@ -39,7 +39,7 @@ Saeid Arabi — Founder & CEO (saeid.arabi@ymail.com)
 Dr. Sungwon Lee — Co-Founder & COO (Katesungwon@gmail.com)
   Fachärztin für Anästhesiologie.
   Expertise: perioperative vascular physiology, intensive care hypertension management, patient safety.
-  Role: Clinical credibility for BfArM pre-consultations, physician network, ICU-level product validation, Korean medical network for Sky Labs engagement.
+  Role: Clinical credibility for BfArM pre-consultations, physician network, ICU-level product validation.
 
 Dr. med. Monsobundu Michael Mbamali — Chief Medical Officer (CMO)
   Kardiologe. Facharzt für Innere Medizin, Zusatzbezeichnung internistische Intensivmedizin.
@@ -85,7 +85,7 @@ CLINICAL FEATURES (AI ENGINES)
    - FAST: User-initiated stroke symptom checker (Face/Arm/Speech) — any YES → EmergencyAlertDialog
 
 4. HRV Burnout Engine — RMSSD trend analysis, burnout risk prediction with date
-5. Sleep Apnea Detection — SpO₂ + sleep stage analysis (Huawei Watch D2)
+5. Sleep Apnea Detection — SpO₂ + sleep stage analysis (data source under review — see HARDWARE note; Sky Labs ring is BP-focused, sleep/SpO₂ source TBD)
 6. AF Detection Engine — Irregular episode detection from HRV data
 7. CHA₂DS₂-VA Scoring — ESC 2024, 9-point scale, stroke risk stratification for AF patients
 8. DASH Diet Scoring — 6 food groups, 10-point scale, sodium-BP link coaching
@@ -110,23 +110,24 @@ REGULATORY STRATEGY
 - BSI TR-03161 (IT security for health apps)
 - DiGA fast-track (BfArM) — provisional listing possible without full RCT, then confirmatory RCT within 1 year
 - Target reimbursement: €699–799 / patient / year
-- Competitor: Oviva (current DiGA holder for hypertension, €200M funded, 8.45 mmHg evidence)
-- LockIN moat: full offline (no cloud dependency), multilingual, Huawei Watch D2 BP integration
+- Competitor: Oviva (current DiGA holder for hypertension, €200M Series D Jan 2026, 8.45 mmHg evidence)
+- LockIN moat: full offline (no cloud dependency), multilingual, continuous 24h cuffless BP via Sky Labs CART ring
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 HARDWARE INTEGRATION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Primary device: Huawei Watch D2 (only consumer watch with validated wrist BP measurement)
-- SDK: Huawei Health Kit (real sleep stages, SpO₂, BP, HRV, steps, calories)
-- ESH/ISO 81060-2 validated BP
-Integration: via Health Connect (Android) or direct BLE
+PRIMARY DEVICE: Sky Labs CART B.P.Pro (ring-form, cuffless, continuous 24h BP)
+- Technology: PPG (photoplethysmography) + AI deep-learning model (PPG2BP-net)
+- CE-MDR certified (Jan 2026), MHRA certified, Korean MFDS approved
+- ISO 81060-2:2018 validated (≤5 mmHg avg error, ≤8 mmHg SD)
+- First ring in official Korean hypertension guidelines (2026); 250,000+ prescriptions
+- Distribution: Omron (global MOU, Nov 2025) + Otsuka (Japan). Omron Ventures is an investor.
+- Integration target: Android Health Connect / iOS HealthKit, or direct BLE
+- DiGA data-residency note: Korea HAS EU adequacy (Decision 2022/254), so the country is allowed under §4 DiGAV. Open issue is BSI C5 server certification — must keep processing on BSI C5 EU servers (AWS Frankfurt), no re-transfer to Korea.
 
-Candidate device: Sky Labs CART B.P.Pro (ring-form, cuffless, continuous 24h BP)
-- CE IIb, MHRA certified, ISO 81060-2:2018 validated (≤5 mmHg avg error)
-- Official 2026 Korean hypertension guidelines
-- 250,000+ prescriptions in Korea
-- Charité Berlin research relationship (2018)
-- Integration target: Android Health Connect or direct BLE
+STATUS: The Huawei Watch D2 has been retired from the DiGA hardware plan. Its blood-pressure sensor is locked to third-party apps and Huawei's Chinese jurisdiction (China Intelligence Law) fails BSI/DiGA data-protection trust. Do not present the Watch D2 as the BP device. If asked about it, explain it was evaluated and ruled out for DiGA, and the Sky Labs ring replaced it.
+
+FUTURE: LockIN may train its own PPG-to-BP model (MIMIC-III-Ext-PPG dataset, PhysioNet, $250 credentialed access) for long-term IP independence and on-device (Core ML / TFLite) inference. This is R&D, not the launch path.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 IP PROTECTION
